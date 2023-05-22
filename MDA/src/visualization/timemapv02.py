@@ -1,4 +1,3 @@
-# %%
 import pandas as pd
 import plotly.express as px
 import dash
@@ -7,20 +6,9 @@ from dash import dcc
 from dash import html
 import os
 
-
-# %%
-path = "C:\\Users\\uygar\\Desktop\\DataAnalytics\\export_40"
-os.chdir(path)
-
-df = pd.read_csv(path+"\\df_final.csv")
+df = pd.read_csv("./df_final.csv")
 df["date"] = pd.to_datetime(df['date'], format='%Y-%m-%d')
-df["ts_str"] = df["date"].dt.strftime("%Y-%m-%d")
 
-
-# %% [markdown]
-# Styling trials
-
-# %%
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SPACELAB]) 
 
 options = [{"label": "Shouting", "value": "Human voice - Shouting"},
@@ -44,15 +32,12 @@ app.layout = dbc.Container([
 ])
 
 
-# %% [markdown]
-# Uses density mapbox
-
-# %%
 @app.callback(dash.dependencies.Output("map", "figure"),
               [dash.dependencies.Input("dropdown", "value")])
 def update_map(event_type):
     if event_type in df.columns:
         filtered_df = df[df[event_type] > 0]
+        filtered_df = filtered_df.sort_values(by=['date'])
         filtered_df["Date"] = filtered_df["date"].dt.strftime("%Y-%m-%d")
         fig = px.density_mapbox(filtered_df,
                                 lat="latitude",
@@ -67,13 +52,5 @@ def update_map(event_type):
     else:
         return dash.no_update
 
-
-# %% [markdown]
-# Run it
-
-# %%
 if __name__ == '__main__':
-    app.run_server(debug=True,port=8051)
-
-
-
+    app.run(port=int(os.environ.get("PORT", 8080)),host='0.0.0.0',debug=False)
