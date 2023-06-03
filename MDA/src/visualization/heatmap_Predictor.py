@@ -4,11 +4,53 @@ import numpy as np
 import joblib
 import holidays
 import dash
-import dash_html_components as html
-import dash_core_components as dcc
+from dash import html
+from dash import dcc
 from skforecast.utils import load_forecaster
 from datetime import datetime
+import plotly.express as px
+
+def create_heatmap(df):
+    fig = px.density_mapbox(
+        df,
+        lat='latitude',
+        lon='longitude',
+        z='prediction',
+        radius=10,
+        center=dict(lat=50.875, lon=4.700),
+        zoom=13,
+        mapbox_style="stamen-terrain",
+        color_continuous_scale="Viridis"
+    )
+    return fig
+
 last_known_timestamp = datetime.strptime('2022-12-31 23', '%Y-%m-%d %H')
+LOCATIONS = [
+    (
+        "255439_mp-01-naamsestraat-35-maxim.csv",
+        (50.877160828051615, 4.7006992525313445),
+    ),
+    ("255440_mp-02-naamsestraat-57-xior.csv", (50.87649057167669, 4.700691639839767)),
+    ("255441_mp-03-naamsestraat-62-taste.csv", (50.875850541602986, 4.700192168675618)),
+    (
+        "255442_mp-05-calvariekapel-ku-leuven.csv",
+        (50.87448678827803, 4.699889625684066),
+    ),
+    (
+        "255443_mp-06-parkstraat-2-la-filosovia.csv",
+        (50.87409073433792, 4.700018371714718),
+    ),
+    ("255444_mp-07-naamsestraat-81.csv", (50.87381822269834, 4.70010170607578)),
+]
+
+forecasters = [
+    "C:\\Users\\uygar\\Desktop\\DataAnalytics\\fcast\\forecaster_h12_255439_mp-01-naamsestraat-35-maxim.pkl",
+    "C:\\Users\\uygar\\Desktop\\DataAnalytics\\fcast\\forecaster_h12_255440_mp-02-naamsestraat-57-xior.pkl",
+    "C:\\Users\\uygar\\Desktop\\DataAnalytics\\fcast\\forecaster_h12_255441_mp-03-naamsestraat-62-taste.pkl",
+    "C:\\Users\\uygar\\Desktop\\DataAnalytics\\fcast\\forecaster_h12_255442_mp-05-calvariekapel-ku-leuven.pkl",
+    "C:\\Users\\uygar\\Desktop\\DataAnalytics\\fcast\\forecaster_h12_255443_mp-06-parkstraat-2-la-filosovia.pkl",
+    "C:\\Users\\uygar\\Desktop\\DataAnalytics\\fcast\\forecaster_h12_255444_mp-07-naamsestraat-81.pkl"
+]
 
 def get_custom_weights(index):
     ts_train = ts_data.loc[start_train:end_val, level]
@@ -70,8 +112,6 @@ def prepare_new_data(new_data):
     new_data["missing"] = 0  # Add the missing column
     new_data = new_data.drop(["day_of_month", "quarter", "exams"], axis=1) 
     return new_data
-
-
 # Create a Dash application
 app = dash.Dash(__name__)
 
@@ -106,44 +146,44 @@ app.layout = html.Div(
 def update_output(n_clicks, date, temp, rain, wind):
     if n_clicks > 0:
         timestamp = pd.to_datetime(date, format='%Y-%m-%d %H')
-        new_data = pd.DataFrame({
-            'timestamp': [pd.to_datetime(date, format='%Y-%m-%d %H')],
-            'LC_TEMP_QCL3': [temp],
-            'LC_RAININ': [rain],
-            'LC_WINDSPEED': [wind]
-        })
-        new_data.set_index('timestamp', inplace=True)
-        new_data = prepare_new_data(new_data)
-        new_data = new_data.fillna(method='pad')  # Or method='backfill'
-        new_data.index = pd.DatetimeIndex(new_data.index, freq='H')
-
-
-        # Load the pre-trained model
-        with open('C:\\Users\\uygar\\Desktop\\DataAnalytics\\fcast\\forecaster_255439_mp-01-naamsestraat-35-maxim.pkl', 'rb') as file:
-            model = load_forecaster(file)
         steps_ahead = int((timestamp - last_known_timestamp).total_seconds() // 3600)
+        # Calculate the starting timestamp for exog data
+        exog_start = last_known_timestamp + pd.DateOffset(hours=1)
+        # Create exog data with default values, assuming default values are zeros
+        future_data = pd.DataFrame({
+            'timestamp': [exog_start + pd.DateOffset(hours=i) for i in range(12)],
+            'LC_TEMP_QCL3': [0] * 12,
+            'LC_RAININ': [0] * 12,
+            'LC_WINDSPEED': [0] * 12
+        })
 
+        future_data.set_index('timestamp', inplace=True)
+        future_data = prepare_new_data(future_data)
+        future_data = future_data.fillna(method='pad')  # Or method='backfill'
+        future_data.index = pd.DatetimeIndex(future_data.index, freq='H')
+
+        # Replace the exog data at the input hour with user-provided values
+        future_data.loc[timestamp, ['LC_TEMP_QCL3', 'LC_RAININ', 'LC_WINDSPEED']] = [temp, rain, wind]
+
+        # Load the pre-trained models and make predictions
         predictions = []
+        for forecaster in forecasters:
+            with open(forecaster, 'rb') as file:
+                model = load_forecaster(file)
+            prediction = model.predict(steps=steps_ahead, exog=future_data)
+            prediction_value = prediction.iloc[-1, 0]  # Get the value of the prediction, not the index
+            predictions.append(prediction_value)
 
-        for i in range(steps_ahead):
-            # Perform a one-step ahead forecast
-            prediction = model.predict(steps=1, exog=new_data)
+        df = pd.DataFrame({
+            'location': [loc[0].split('_')[-1].replace('.csv', '') for loc in LOCATIONS],  # extracting location name from the CSV filename
+            'prediction': predictions,
+            'latitude': [loc[1][0] for loc in LOCATIONS],
+            'longitude': [loc[1][1] for loc in LOCATIONS],
+        })
 
-            # Store the forecast
-            predictions.append(prediction)
+        fig = create_heatmap(df)
+        return dcc.Graph(figure=fig)
 
-            # Update the input data for the next forecast
-            new_row = pd.DataFrame({
-                'timestamp': [timestamp + pd.DateOffset(hours=i)],
-                'LC_TEMP_QCL3': [temp],
-                'LC_RAININ': [rain],
-                'LC_WINDSPEED': [wind]
-            })
-            new_row.set_index('timestamp', inplace=True)
-            new_row = prepare_new_data(new_row)
-            new_row = new_row.fillna(method='pad')  # Or method='backfill'
-            new_data = pd.concat([new_data[:-1], new_row])
-        return html.Div(f"The predicted values are {predictions}.")
 # Run the application
 if __name__ == "__main__":
     app.run_server(debug=True)
