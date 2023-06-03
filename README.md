@@ -27,7 +27,9 @@ The following libraries are required:
 
 ## Data
 
-The model uses data from several noise sensors located at different points in the city. This data is stored in csv files. The model also uses weather data (temperature, rainfall, and wind speed) and date/time data (time of day, day of week, month, season, etc.) as additional features. The academic calendar of the KU Leuven university is also taken into account.
+The forecast model uses data from several noise sensors located at different points in the city. This data is stored in csv files. The model also uses weather data (temperature, rainfall, and wind speed) and date/time data (time of day, day of week, month, season, etc.) as additional features. The academic calendar of KU Leuven is also taken into account.
+
+The classifier model uses features of date/time (hour of day, day of week), targets Google trends data for the search 'leuven politie' to replace for police calls/complaints data, obtained with pytrends package.
 
 ## Usage
 
