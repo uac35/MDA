@@ -1,6 +1,6 @@
 # Noise Events Forecasting in the City of Leuven
 
-This project uses data from noise sensors and a machine learning model to forecast human noise in the city of Leuven, Belgium. The forecasting results are visualized on a heat map. The project also uses an additional machine learning model to predict the level of police activity based on the forecasted noise levels and other features.
+This project uses data from noise sensors and a machine learning model to forecast human noise in the city of Leuven, Belgium. The forecasting results are visualized on a heat map. The project also uses an additional machine learning model to predict the level of police activity (google trends search: 'leuven politie') based on the forecasted noise levels and other features.
 
 ## Project Repository
 
