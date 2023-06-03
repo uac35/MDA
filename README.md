@@ -12,7 +12,7 @@ A live demo of the application is running on Google Cloud Run and can be accesse
 
 ## Requirements
 
-The following libraries are required:
+The following libraries are required for the final app:
 
 - dash
 - dash_bootstrap_components
