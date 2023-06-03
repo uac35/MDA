@@ -34,7 +34,7 @@ The model uses data from several noise sensors located at different points in th
 To run the Dash application:
 
 1. Install the required libraries.
-2. Clone the [completed app container](https://github.com/uac35/MDA/app_final) and change your working directory to the project folder.
+2. Clone the [completed app container](https://github.com/uac35/MDA/tree/main/app_final) and change your working directory to the project folder.
 3. Run the script using a Python interpreter. The Dash app will start and can be accessed from a web browser.
 4. It is possible to deploy this container directly with Google Cloud Run.
 
