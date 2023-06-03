@@ -8,7 +8,7 @@ The GitHub repository for this project can be found [here](https://github.com/ua
 
 ## Live Demo
 
-A live demo of the application is running on Google Cloud Run and can be accessed [here](https://dash-mdamal-g6oxupb6zq-lz.a.run.app/).
+A live demo of the application is running on Google Cloud Run and can be accessed [here](https://dash-mdamal-g6oxupb6zq-lz.a.run.app/). Please keep in mind this demo can only predict 12 hours ahead (until 2023-01-1 11), but can always be retrained to include more.
 
 ## Requirements
 
