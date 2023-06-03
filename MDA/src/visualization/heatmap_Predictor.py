@@ -9,6 +9,13 @@ from dash import dcc
 from skforecast.utils import load_forecaster
 from datetime import datetime
 import plotly.express as px
+from holidays import Belgium
+
+# Load classifier model from pickle, google trends data
+with open("c:\\Users\\uygar\\Desktop\\DataAnalytics\\fcast\\classifier_trends_hour.pkl", "rb") as file:
+    classifier = pickle.load(file)
+    
+
 
 def create_heatmap(df):
     fig = px.density_mapbox(
@@ -16,10 +23,11 @@ def create_heatmap(df):
         lat='latitude',
         lon='longitude',
         z='prediction',
+        hover_data='police_activity',
         radius=10,
         center=dict(lat=50.875, lon=4.700),
-        zoom=13,
-        mapbox_style="stamen-terrain",
+        zoom=14,
+        mapbox_style="carto-positron",
         color_continuous_scale="Viridis"
     )
     return fig
@@ -167,20 +175,46 @@ def update_output(n_clicks, date, temp, rain, wind):
 
         # Load the pre-trained models and make predictions
         predictions = []
+        classified  =[]
         for forecaster in forecasters:
             with open(forecaster, 'rb') as file:
                 model = load_forecaster(file)
             prediction = model.predict(steps=steps_ahead, exog=future_data)
             prediction_value = prediction.iloc[-1, 0]  # Get the value of the prediction, not the index
             predictions.append(prediction_value)
+            day_of_week = timestamp.dayofweek
+            is_weekend = 1 if day_of_week > 4 else 0  # 5 and 6 corresponds to Saturday and Sunday
+            belgium_holidays = Belgium()
+            is_holiday = 1 if timestamp in belgium_holidays else 0
+            hour_of_day = timestamp.hour
+            classifier_features = pd.DataFrame([{
+            'human_noise': prediction_value, # Add noise predictions
+            'day_of_week': day_of_week,
+            'is_weekend': is_weekend,
+            'is_holiday': is_holiday,
+            'hour_of_day': hour_of_day,
+            }])
+                   # Use the classifier to predict police activity
+            police_activity = classifier.predict(classifier_features)
+            police_activity = 'Low' if police_activity == 0 else 'High' # Map binary output to 'High'/'Low'
+            classified.append(police_activity)
+
+ 
+        
 
         df = pd.DataFrame({
             'location': [loc[0].split('_')[-1].replace('.csv', '') for loc in LOCATIONS],  # extracting location name from the CSV filename
             'prediction': predictions,
             'latitude': [loc[1][0] for loc in LOCATIONS],
             'longitude': [loc[1][1] for loc in LOCATIONS],
+            'police_activity': classified,
         })
+        # Extract features
 
+        
+        
+        # Add police_activity to the 'df' dataframe
+ 
         fig = create_heatmap(df)
         return dcc.Graph(figure=fig)
 
