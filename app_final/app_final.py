@@ -12,7 +12,7 @@ import holidays
 import os
 import pickle
 from holidays import Belgium
-#os.chdir('C:\\Users\\uygar\\Desktop\\DataAnalytics\\woork\\ppf')
+#os.chdir('C:\\Users\\uygar\\Desktop\\DataAnalytics\\woork\\agla_rem')
 
 app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
 
@@ -65,23 +65,23 @@ def update_map(event_type):
 
 # All the code for the page of the forecaster
 # Load classifier model from pickle, google trends data
-with open("./classifier_trends_hour.pkl", "rb") as file:
+with open("./classifier_trends_daily.pkl", "rb") as file:
     classifier = pickle.load(file)
     
 
 
 def create_heatmap(df):
-    fig = px.density_mapbox(
+    fig = px.scatter_mapbox(
         df,
         lat='latitude',
         lon='longitude',
-        z='prediction',
-        hover_data='police_activity',
-        radius=10,
+        color='prediction',
+        size='prediction',
         center=dict(lat=50.875, lon=4.700),
         zoom=14,
         mapbox_style="carto-positron",
-        color_continuous_scale="Viridis"
+        color_continuous_scale="Viridis",
+        size_max=15,
     )
     return fig
 
@@ -270,41 +270,20 @@ def update_output(n_clicks, date, temp, rain, wind):
 
             # Load the pre-trained models and make predictions
             predictions = []
-            classified  =[]
             for forecaster in forecasters:
                 with open(forecaster, 'rb') as file:
                     model = load_forecaster(file)
                 prediction = model.predict(steps=steps_ahead, exog=future_data)
                 prediction_value = prediction.iloc[-1, 0]  # Get the value of the prediction, not the index
-                predictions.append(prediction_value)
-                day_of_week = timestamp.dayofweek
-                is_weekend = 1 if day_of_week > 4 else 0  # 5 and 6 corresponds to Saturday and Sunday
-                belgium_holidays = Belgium()
-                is_holiday = 1 if timestamp in belgium_holidays else 0
-                hour_of_day = timestamp.hour
-                classifier_features = pd.DataFrame([{
-                'human_noise': prediction_value, # Add noise predictions
-                'day_of_week': day_of_week,
-                'is_weekend': is_weekend,
-                'is_holiday': is_holiday,
-                'hour_of_day': hour_of_day,
-                }])
-                    # Use the classifier to predict police activity
-                police_activity = classifier.predict(classifier_features)
-                police_activity = 'Low' if police_activity == 0 else 'High' # Map binary output to 'High'/'Low'
-                classified.append(police_activity)
-
-    
-            
+                predictions.append(prediction_value)          
 
             df = pd.DataFrame({
                 'location': [loc[0].split('_')[-1].replace('.csv', '') for loc in LOCATIONS],  # extracting location name from the CSV filename
                 'prediction': predictions,
                 'latitude': [loc[1][0] for loc in LOCATIONS],
                 'longitude': [loc[1][1] for loc in LOCATIONS],
-                'police_activity': classified,
             })
-            # Extract features
+
 
             
             
@@ -314,6 +293,37 @@ def update_output(n_clicks, date, temp, rain, wind):
             return dcc.Graph(figure=fig)
         except Exception as e:
             return f"Error: Check the input, potentially out of forecast range. Error message: {str(e)}"
+        
+        
+@app.callback(
+    dash.dependencies.Output("guess-output", "children"),
+    dash.dependencies.Input("guess-button", "n_clicks"),
+    [
+        dash.dependencies.State("date-input", "value"),
+        dash.dependencies.State("noise-input", "value"),
+    ],
+)
+def update_output2(n_clicks, date, noise_human):
+    if n_clicks > 0:
+        try:       
+            timestamp = pd.to_datetime(date, format='%Y-%m-%d %H')   
+            day_of_week = timestamp.dayofweek
+            is_weekend = 1 if day_of_week > 4 else 0  # 5 and 6 corresponds to Saturday and Sunday
+            belgium_holidays = Belgium()
+            is_holiday = 1 if timestamp in belgium_holidays else 0
+            classifier_features = pd.DataFrame([{
+                'human_noise': noise_human, # Add noise predictions
+                'day_of_week': day_of_week,
+                'is_weekend': is_weekend,
+                'is_holiday': is_holiday,
+            }])
+                    # Use the classifier to predict police activity
+            police_activity = classifier.predict(classifier_features)
+            police_activity = 'low' if police_activity == 0 else 'high' # Map binary output to 'High'/'Low'
+            
+            return f"Expect {police_activity} police activity"
+        except Exception as e:
+            return f"Error message: {str(e)}"
 
 if __name__ == "__main__":
     app.run(port=int(os.environ.get("PORT", 8080)),host='0.0.0.0',debug=False)
