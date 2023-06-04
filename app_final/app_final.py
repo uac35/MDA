@@ -46,6 +46,7 @@ def update_map(event_type):
         filtered_df = df[df[event_type] > 0]
         filtered_df = filtered_df.sort_values(by=["date"])
         filtered_df["Date"] = filtered_df["date"].dt.strftime("%Y-%m-%d")
+        filtered_df["marker_size"]=1
         max_value = filtered_df[event_type].max()
         fig = px.scatter_mapbox(
             filtered_df,
@@ -54,6 +55,7 @@ def update_map(event_type):
             color=event_type,
             hover_data=["description"],
             animation_frame="Date",
+            size="marker_size",
             color_continuous_scale="Jet",  # optional color scale
             range_color=[0, max_value],  # optional fixed color range
             mapbox_style="carto-positron",
@@ -71,15 +73,18 @@ with open("./classifier_trends_daily.pkl", "rb") as file:
 
 
 def create_heatmap(df):
-    df['hover_text'] = df['prediction'].apply(lambda x: 'Expect noise' if x == 1 else 'Quiet')
+    df['Predicted'] = df['prediction'].apply(lambda x: 'Expect noise' if x == 1 else 'Quiet')
+    df['marker_size']=3
     fig = px.scatter_mapbox(
         df,
         lat='latitude',
         lon='longitude',
         color='prediction',
-        size='prediction',
-        hover_data={'Prediction': True},
+        size='marker_size',
+        hover_data={'Predicted': True},
         center=dict(lat=50.875, lon=4.700),
+        color_continuous_scale='Jet',
+        range_color=[0,1],
         zoom=14,  
         mapbox_style="carto-positron",
         size_max=10,
