@@ -8,7 +8,7 @@ The GitHub repository for this project can be found [here](https://github.com/ua
 
 ## Live Demo
 
-A live demo of the application is running on Google Cloud Run and can be accessed [here](https://dash-mdamal-g6oxupb6zq-lz.a.run.app/). Please keep in mind this demo can only predict 12 hours ahead (upto 2023-01-1 11:59), but can always be retrained to include more.
+A live demo of the application is running on Google Cloud Run and can be accessed [here](https://dash-mdamal-g6oxupb6zq-lz.a.run.app/). Please keep in mind this demo can only predict 12 hours ahead of the last window (2023-01-01 and between 00 and 11). If this were deployed as an actual product, we'd ideally get realtime data from the event sensors, and use the last_window argument in the predict function to generate predictions for other timestamps (but always max 12 hours ahead of current date).
 
 ## Requirements
 
