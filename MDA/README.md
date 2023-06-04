@@ -1,4 +1,4 @@
-project_name
+Team MALAWI
 ==============================
 
 Project for MDA Course
