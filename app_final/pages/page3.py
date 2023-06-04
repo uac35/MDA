@@ -7,7 +7,7 @@ dash.register_page(__name__)
 
 layout = html.Div(
     [
-        html.H1("Forecasting Model"),
+        html.H1("Police Activity Model"),
         html.Label("Date and Hour (format: YYYY-MM-DD):"),
         dcc.Input(id="date-input", type="text", style={'height':'25px', 'width':'120px'}),
         html.Label("Human Noise Occurence [Amount]:"),
