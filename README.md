@@ -1,6 +1,6 @@
 # Noise Events Forecasting in the City of Leuven
 
-This project uses data from noise sensors and a machine learning model to forecast human noise in the city of Leuven, Belgium. The forecasting results are visualized on a heat map. The project also uses an additional machine learning model to predict the level of police activity (google trends search: 'leuven politie') based on the forecasted noise levels and other features.
+This project uses data from noise sensors and a machine learning model to forecast human noise in the city of Leuven, Belgium. The forecasting results are visualized on a heat map.
 
 ## Project Repository
 
@@ -8,7 +8,7 @@ The GitHub repository for this project can be found [here](https://github.com/ua
 
 ## Live Demo
 
-A live demo of the application is running on Google Cloud Run and can be accessed [here](https://dash-mdamal-g6oxupb6zq-lz.a.run.app/). Please keep in mind this demo can only predict 12 hours ahead (until 2023-01-1 11), but can always be retrained to include more.
+A live demo of the application is running on Google Cloud Run and can be accessed [here](https://dash-mdamal-g6oxupb6zq-lz.a.run.app/). Please keep in mind this demo can only predict 12 hours ahead (upto 2023-01-1 11), but can always be retrained to include more.
 
 ## Requirements
 
@@ -50,9 +50,7 @@ In the app, users can select a date and time and input weather conditions. Upon 
 
 ## Model
 
-Two machine learning models are used in this project:
-
-1. A time series forecasting model that predicts human noise event. See [here](https://github.com/uac35/MDA/tree/Forecast/MDA/notebooks) and [here](https://github.com/uac35/MDA/tree/Forecast/MDA/models/forecasters)
-2. A binary classifier that predicts the level of police activity ('High' or 'Low'). Located [here](https://github.com/uac35/MDA/tree/main/MDA/models/Classifier)
+A time series forecasting model that predicts human noise event. See [here](https://github.com/uac35/MDA/tree/Forecast/MDA/notebooks) and [here](https://github.com/uac35/MDA/tree/Forecast/MDA/models/forecasters)
+Additionally, a complementary binary classifier that predicts the level of police activity ('High' or 'Low') based on the human noise activity data. Located [here](https://github.com/uac35/MDA/tree/main/MDA/models/Classifier)
 
 The models were trained separately and saved to pickle files, which are loaded when the app runs.
