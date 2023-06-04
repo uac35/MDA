@@ -48,19 +48,18 @@ def update_map(event_type):
         filtered_df["Date"] = filtered_df["date"].dt.strftime("%Y-%m-%d")
         filtered_df["marker_size"]=1
         max_value = filtered_df[event_type].max()
-        fig = px.scatter_mapbox(
+        fig = px.density_mapbox(
             filtered_df,
             lat="latitude",
             lon="longitude",
-            color=event_type,
+            z=event_type,
             hover_data=["description"],
             animation_frame="Date",
-            size="marker_size",
-            color_continuous_scale="Jet",  # optional color scale
-            range_color=[0, max_value],  # optional fixed color range
+            range_color=[0, max_value],
             mapbox_style="carto-positron",
+            zoom=13,
         )
-        fig.update_layout(margin={"l": 0, "r": 0, "t": 0, "b": 0}, mapbox_zoom=13)
+        fig.update_layout(margin={"l": 0, "r": 0, "t": 0, "b": 0})
         return fig
     else:
         return dash.no_update
