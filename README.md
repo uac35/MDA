@@ -52,7 +52,7 @@ In the app, users can select a date and time and input weather conditions. Upon 
 
 Two machine learning models are used in this project:
 
-1. A time series forecasting model that predicts human noise event.
+1. A time series forecasting model that predicts human noise event. See [here](https://github.com/uac35/MDA/tree/Forecast/MDA/notebooks) 
 2. A binary classifier that predicts the level of police activity ('High' or 'Low'). Located [here](https://github.com/uac35/MDA/tree/main/MDA/models/Classifier)
 
 The models were trained separately and saved to pickle files, which are loaded when the app runs.
