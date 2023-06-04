@@ -2,7 +2,7 @@
 
 ## Objective:
 
-The objective of the code is to classify police activity based on noise events using hourly data. It's implemented in Python using pandas for data processing, Pytrends to get Google Trends data, and Scikit-learn for machine learning tasks.
+The objective of the code is to classify police activity based on noise events using hourly data. It's implemented in Python using pandas for data processing, Pytrends to get Google Trends data, and Scikit-learn for machine learning tasks. The target police activity(Google trends: 'leuven politie') is assumed to be directly related to actual police calls/complaints, which is a big assumption but access to actual data was not possible. 
 
 ## Code Description:
 
