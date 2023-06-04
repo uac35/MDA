@@ -12,7 +12,7 @@ import holidays
 import os
 import pickle
 from holidays import Belgium
-#os.chdir('C:\\Users\\uygar\\Desktop\\DataAnalytics\\woork\\agla_rem')
+#os.chdir('C:\\Users\\uygar\\Desktop\\DataAnalytics\\woork\\newestofthenew')
 
 app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB])
 
@@ -46,22 +46,22 @@ def update_map(event_type):
         filtered_df = df[df[event_type] > 0]
         filtered_df = filtered_df.sort_values(by=["date"])
         filtered_df["Date"] = filtered_df["date"].dt.strftime("%Y-%m-%d")
-        fig = px.density_mapbox(
+        max_value = filtered_df[event_type].max()
+        fig = px.scatter_mapbox(
             filtered_df,
             lat="latitude",
             lon="longitude",
-            z=event_type,
-            radius=10,
+            color=event_type,
             hover_data=["description"],
             animation_frame="Date",
+            color_continuous_scale="Jet",  # optional color scale
+            range_color=[0, max_value],  # optional fixed color range
             mapbox_style="carto-positron",
         )
         fig.update_layout(margin={"l": 0, "r": 0, "t": 0, "b": 0}, mapbox_zoom=13)
         return fig
     else:
         return dash.no_update
-
-
 
 # All the code for the page of the forecaster
 # Load classifier model from pickle, google trends data
@@ -71,18 +71,20 @@ with open("./classifier_trends_daily.pkl", "rb") as file:
 
 
 def create_heatmap(df):
+    df['hover_text'] = df['prediction'].apply(lambda x: 'Expect noise' if x == 1 else 'Quiet')
     fig = px.scatter_mapbox(
         df,
         lat='latitude',
         lon='longitude',
         color='prediction',
         size='prediction',
+        hover_data={'Prediction': True},
         center=dict(lat=50.875, lon=4.700),
-        zoom=14,
+        zoom=14,  
         mapbox_style="carto-positron",
-        color_continuous_scale="Viridis",
-        size_max=15,
+        size_max=10,
     )
+    fig.update_layout(coloraxis_showscale=False)
     return fig
 
 last_known_timestamp = datetime.strptime("2022-12-31 23", "%Y-%m-%d %H")
