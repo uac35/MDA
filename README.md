@@ -46,7 +46,7 @@ python app_final.py
 
 Then, open a web browser and go to http://localhost:8080 to access the app.
 
-In the app, users can select a date and time and input weather conditions. Upon clicking the 'Predict' button, the app will make a human noise event forecast for the selected date/time and weather conditions. The results will be shown on a heatmap, which also indicates the predicted police activity level for each location. There is also separate page where users can view the previous noise event data of Leuven.
+In the app, users can select a date and time and input weather conditions. Upon clicking the 'Predict' button, the app will make a human noise event forecast for the selected date/time and weather conditions. The results will be shown on a heatmap, which also indicates the predicted police activity level for each location. There is also separate page where users can view the previous noise event data of Leuven. Page 3 has the classifier model that uses date and noise occurence data for predicting possible police activity.
 
 ## Model
 
