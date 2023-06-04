@@ -51,7 +51,7 @@ In the app, users can select a date and time and input weather conditions. Upon 
 
 ## Model
 
-A time series forecasting model that predicts human noise event. See [here](https://github.com/uac35/MDA/tree/Forecast/MDA/notebooks) and [here](https://github.com/uac35/MDA/tree/Forecast/MDA/models/forecasters)
+A time series forecasting model that predicts human noise event. See [here](https://github.com/uac35/MDA/tree/main/MDA/notebooks) and [here](https://github.com/uac35/MDA/tree/main/MDA/models/forecasters)
 Additionally, a complementary binary classifier that predicts the level of police activity ('High' or 'Low') based on the human noise activity data. Located [here](https://github.com/uac35/MDA/tree/main/MDA/models/Classifier)
 
 The models were trained separately using a *direct multi-step forecast strategy* and saved to indvidual pickle files, which are loaded when the app runs.
